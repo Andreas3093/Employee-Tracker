@@ -87,6 +87,7 @@ const viewDepartments = () => {
     for (var i = 0; i < res.length; i++) {
         console.log(res[i].name);
     }
+    options()
     });
 }
 

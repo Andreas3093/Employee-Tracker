@@ -15,7 +15,7 @@ connection.connect(function(err){
     options();
 })
 
-const option = () => {
+const options = () => {
     inquirer
         .prompt({
             name: 'action',
@@ -59,33 +59,35 @@ const option = () => {
                     deleteEmployee();
                     break;
                 case 'EXIT':
-                    exitApp();
+                    connection.end();
                     break;
                 default:
+                    console.log(`Invalid Action: ${answer.action}`);
                     break;
             }
         })
 }
 
-// view all employees in the database
+//view all employees in the database
 const viewEmployees = () => {
     const query = 'SELECT * FROM employee';
     connection.query(query, (err, res) =>{
         if (err) throw err;
         console.log(res.length + ' Employees Found!');
         console.table('All Employees', res);
-        option()
+        options()
     })
 }
 
 // view all departments in the database
 const viewDepartments = () => {
-    const query = 'SELECT * FROM department';
-    connection.query(query, (err, res) =>{
-        if (err) throw err;
-        console.table('All Deparments', res);
-        option()
-    })
+    const query = "SELECT * FROM department";
+    connection.query(query, (err, res) => {
+        if (err) throw err
+    for (var i = 0; i < res.length; i++) {
+        console.log(res[i].name);
+    }
+    });
 }
 
 // view all roles in the database
@@ -94,7 +96,7 @@ const viewRoles = () => {
     connection.query(query, (err, res) =>{
         if (err) throw err;
         console.table('All Roles', res);
-        option()
+        options()
     })
 }
 
@@ -277,8 +279,8 @@ const deleteEmployee = () =>{
                 if (err) throw err
                 console.log('Employee has been removed!');
                 console.table('Employee Remove:', res);
+                options()
             })
         })
 
 };
-option();

@@ -131,7 +131,7 @@ const addEmployee = () => {
                     },
                     message: "What is this employee's role? "
                 }
-            ]).then(function (answer) {
+            ]).then((answer) => {
                 let role_id;
                 for (let a = 0; a < res.length; a++) {
                     if (res[a].title == answer.role) {
@@ -165,13 +165,13 @@ const addDepartment = () => {
                 type: 'input', 
                 message: 'Which department would you like to add?'
             }
-            ]).then(function (answer) {
+            ]).then((answer) => {
                 connection.query(
                     'INSERT INTO department SET ?',
                     {
                         name: answer.newDepartment
                     });
-                var query = 'SELECT * FROM department';
+                const query = 'SELECT * FROM department';
                 connection.query(query, function(err, res) {
                 if(err)throw err;
                 console.log('Your department has been added!');
@@ -180,3 +180,105 @@ const addDepartment = () => {
                 })
             })
 };
+
+// add a role to the database
+const addRole = () => {
+    connection.query('SELECT * FROM department', function(err, res) {
+        if (err) throw err;
+    
+        inquirer 
+        .prompt([
+            {
+                name: 'new_role',
+                type: 'input', 
+                message: "What new role would you like to add?"
+            },
+            {
+                name: 'salary',
+                type: 'input',
+                message: 'What is the salary of this role? (Enter a number)'
+            },
+            {
+                name: 'Department',
+                type: 'list',
+                choices: function() {
+                    const deptArry = [];
+                    for (let i = 0; i < res.length; i++) {
+                    deptArry.push(res[i].name);
+                    }
+                    return deptArry;
+                },
+            }
+        ]).then((answer) => {
+            let department_id;
+            for (let a = 0; a < res.length; a++) {
+                if (res[a].name == answer.Department) {
+                    department_id = res[a].id;
+                }
+            }
+    
+            connection.query(
+                'INSERT INTO role SET ?',
+                {
+                    title: answer.new_role,
+                    salary: answer.salary,
+                    department_id: department_id
+                },
+                (err, res) => {
+                    if(err)throw err;
+                    console.log('Your new role has been added!');
+                    console.table('All Roles:', res);
+                    options();
+                })
+        })
+    })
+};
+
+// update a role in the database
+const updateRole = () => {
+    inquirer
+        .prompt({
+            name: "id",
+            type: "input",
+            message: "Enter employee id",
+        }).then((answer) => {
+            let id = answer.id;
+
+            inquirer
+                .prompt({
+                    name: "roleId",
+                    type: "input",
+                    message: "Enter role id",
+                }).then((answer) => {
+                    const roleId = answer.roleId;
+                    const query = "UPDATE employee SET role_id=? WHERE id=?";
+                    connection.query(query, [roleId, id], (err, res) => {
+                        if (err) throw err;
+                        console.log('Your role has been updated!');
+                        console.table('Update Role:', res);
+                        option()
+                    })
+                })
+        })
+}
+
+//  delete an employee
+const deleteEmployee = () =>{
+    inquirer
+        .prompt({
+            name: "deleteEmployee",
+            type: "input",
+            message: "To REMOVE an employee, enter the Employee id",
+        }).then((answer) => {
+            const query = 'DELETE FROM employee WHERE?';
+            const newId = Number(answer.deleteEmployee);
+            console.log(newId);
+            connection.query(query, {id: newId}, (err, res) => {
+                if (err) throw err
+                console.log('Employee has been removed!');
+                console.table('Employee Remove:', res);
+            })
+        })
+
+};
+option();
